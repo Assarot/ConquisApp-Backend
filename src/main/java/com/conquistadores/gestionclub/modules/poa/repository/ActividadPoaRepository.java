@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface ActividadPoaRepository extends JpaRepository<ActividadPoa, Long> {
     List<ActividadPoa> findByPoaIdPoa(Long idPoa);
+    boolean existsByIdActividadAndPoaClubIdClub(Long idActividad, Long idClub);
 }

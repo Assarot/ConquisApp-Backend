@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface PoaRepository extends JpaRepository<Poa, Long> {
     List<Poa> findByClubIdClub(Long idClub);
     Optional<Poa> findByClubIdClubAndAnio(Long idClub, Integer anio);
+    boolean existsByIdPoaAndClubIdClub(Long idPoa, Long idClub);
 }
