@@ -15,9 +15,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class VersionCuadernillo {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_version_cuadernillo")
-    private String idVersionCuadernillo;
+    private Long idVersionCuadernillo;
 
     @Column(name = "numero_version", nullable = false)
     private String numeroVersion;

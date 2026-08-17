@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface HistorialUnidadRepository extends JpaRepository<HistorialUnidad, String> {
-    List<HistorialUnidad> findByMiembroIdMiembro(String idMiembro);
+public interface HistorialUnidadRepository extends JpaRepository<HistorialUnidad, Long> {
+    List<HistorialUnidad> findByMiembroIdMiembro(Long idMiembro);
 }

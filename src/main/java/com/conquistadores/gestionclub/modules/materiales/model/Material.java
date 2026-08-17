@@ -4,6 +4,7 @@ import com.conquistadores.gestionclub.modules.club.model.Clase;
 import com.conquistadores.gestionclub.modules.especialidades.model.Especialidad;
 import com.conquistadores.gestionclub.modules.sesiones.model.Sesion;
 import com.conquistadores.gestionclub.modules.auth.model.Usuario;
+import com.conquistadores.gestionclub.modules.auditoria.listener.AuditListener;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,15 +13,16 @@ import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "materiales")
+@EntityListeners(AuditListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Material {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_material")
-    private String idMaterial;
+    private Long idMaterial;
 
     @Column(nullable = false)
     private String tipo; // "PDF", "WORD", "IMAGEN", "ENLACE", "VIDEO"

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AvanceRepository extends JpaRepository<Avance, String> {
-    List<Avance> findByMiembroIdMiembro(String idMiembro);
-    Optional<Avance> findByMiembroIdMiembroAndRequisitoIdRequisito(String idMiembro, String idRequisito);
+public interface AvanceRepository extends JpaRepository<Avance, Long> {
+    List<Avance> findByMiembroIdMiembro(Long idMiembro);
+    Optional<Avance> findByMiembroIdMiembroAndRequisitoIdRequisito(Long idMiembro, Long idRequisito);
 }

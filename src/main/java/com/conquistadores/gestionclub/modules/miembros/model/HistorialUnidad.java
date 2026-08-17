@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class HistorialUnidad {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_historial_unidad")
-    private String idHistorialUnidad;
+    private Long idHistorialUnidad;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_miembro", nullable = false)

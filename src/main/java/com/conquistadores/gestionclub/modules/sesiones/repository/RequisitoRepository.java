@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RequisitoRepository extends JpaRepository<Requisito, String> {
-    List<Requisito> findByVersionCuadernilloIdVersionCuadernillo(String idVersionCuadernillo);
+public interface RequisitoRepository extends JpaRepository<Requisito, Long> {
+    List<Requisito> findByVersionCuadernilloIdVersionCuadernillo(Long idVersionCuadernillo);
+    List<Requisito> findByClaseIdClase(Long idClase);
+    List<Requisito> findByEspecialidadIdEspecialidad(Long idEspecialidad);
 }

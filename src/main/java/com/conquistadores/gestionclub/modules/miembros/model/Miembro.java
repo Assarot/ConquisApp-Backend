@@ -3,6 +3,7 @@ package com.conquistadores.gestionclub.modules.miembros.model;
 import com.conquistadores.gestionclub.modules.club.model.Club;
 import com.conquistadores.gestionclub.modules.club.model.Clase;
 import com.conquistadores.gestionclub.modules.club.model.Unidad;
+import com.conquistadores.gestionclub.modules.auditoria.listener.AuditListener;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,15 +12,16 @@ import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "miembros")
+@EntityListeners(AuditListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Miembro {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_miembro")
-    private String idMiembro;
+    private Long idMiembro;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_club", nullable = false)

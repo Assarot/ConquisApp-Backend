@@ -15,9 +15,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Cronograma {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_cronograma")
-    private String idCronograma;
+    private Long idCronograma;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_clase", nullable = false)

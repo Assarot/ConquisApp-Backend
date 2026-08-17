@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BloqueCronogramaRepository extends JpaRepository<BloqueCronograma, String> {
-    List<BloqueCronograma> findByCronogramaIdCronograma(String idCronograma);
+public interface BloqueCronogramaRepository extends JpaRepository<BloqueCronograma, Long> {
+    List<BloqueCronograma> findByCronogramaIdCronograma(Long idCronograma);
 }

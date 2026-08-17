@@ -13,7 +13,7 @@ public class AsistenciaService {
     @Autowired
     private AsistenciaRepository asistenciaRepository;
 
-    public List<Asistencia> getAsistenciasBySesion(String idSesion) {
+    public List<Asistencia> getAsistenciasBySesion(Long idSesion) {
         return asistenciaRepository.findBySesionIdSesion(idSesion);
     }
 

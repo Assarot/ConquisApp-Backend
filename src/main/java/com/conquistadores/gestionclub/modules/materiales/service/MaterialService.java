@@ -13,19 +13,25 @@ public class MaterialService {
     @Autowired
     private MaterialRepository materialRepository;
 
-    public List<Material> getMaterialesByClase(String idClase) {
-        return materialRepository.findByClaseIdClase(idClase);
+    public List<Material> getMaterialesByClase(Long idClase, Long idClub) {
+        if (idClub == null) {
+            return materialRepository.findByClaseIdClase(idClase);
+        }
+        return materialRepository.findByClaseIdClaseAndUsuarioCreadorClubIdClub(idClase, idClub);
     }
 
-    public List<Material> getMaterialesByEspecialidad(String idEspecialidad) {
-        return materialRepository.findByEspecialidadIdEspecialidad(idEspecialidad);
+    public List<Material> getMaterialesByEspecialidad(Long idEspecialidad, Long idClub) {
+        if (idClub == null) {
+            return materialRepository.findByEspecialidadIdEspecialidad(idEspecialidad);
+        }
+        return materialRepository.findByEspecialidadIdEspecialidadAndUsuarioCreadorClubIdClub(idEspecialidad, idClub);
     }
 
     public Material guardarMaterial(Material material) {
         return materialRepository.save(material);
     }
 
-    public void eliminarMaterial(String idMaterial) {
+    public void eliminarMaterial(Long idMaterial) {
         materialRepository.deleteById(idMaterial);
     }
 }

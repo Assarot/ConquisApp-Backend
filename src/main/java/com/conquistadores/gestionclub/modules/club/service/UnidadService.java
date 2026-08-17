@@ -35,7 +35,7 @@ public class UnidadService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<UnidadResponse> getUnidadesByClub(String idClub) {
+    public List<UnidadResponse> getUnidadesByClub(Long idClub) {
         List<Unidad> unidades = unidadRepository.findByClubIdClub(idClub);
         return unidades.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
@@ -45,7 +45,7 @@ public class UnidadService {
     }
 
     @Transactional
-    public Unidad crearUnidad(String idClub, String nombre, String idConsejero, String icono, String color, String descripcion) {
+    public Unidad crearUnidad(Long idClub, String nombre, Long idConsejero, String icono, String color, String descripcion) {
         Club club = clubRepository.findById(idClub)
                 .orElseThrow(() -> new RuntimeException("Club no encontrado"));
 
@@ -56,7 +56,7 @@ public class UnidadService {
         unidad.setColor(color);
         unidad.setDescripcion(descripcion);
 
-        if (idConsejero != null && !idConsejero.isEmpty()) {
+        if (idConsejero != null) {
             Usuario consejero = usuarioRepository.findById(idConsejero)
                     .orElseThrow(() -> new RuntimeException("Consejero no encontrado"));
             unidad.setConsejero(consejero);
@@ -66,7 +66,7 @@ public class UnidadService {
     }
 
     @Transactional
-    public Unidad actualizarUnidad(String idUnidad, String nombre, String idConsejero, String icono, String color, String descripcion) {
+    public Unidad actualizarUnidad(Long idUnidad, String nombre, Long idConsejero, String icono, String color, String descripcion) {
         Unidad unidad = unidadRepository.findById(idUnidad)
                 .orElseThrow(() -> new RuntimeException("Unidad no encontrada"));
 
@@ -75,11 +75,11 @@ public class UnidadService {
         if (color != null) unidad.setColor(color);
         if (descripcion != null) unidad.setDescripcion(descripcion);
 
-        if (idConsejero != null && !idConsejero.isEmpty()) {
+        if (idConsejero != null) {
             Usuario consejero = usuarioRepository.findById(idConsejero)
                     .orElseThrow(() -> new RuntimeException("Consejero no encontrado"));
             unidad.setConsejero(consejero);
-        } else if (idConsejero == null) {
+        } else {
             unidad.setConsejero(null);
         }
 
@@ -87,7 +87,7 @@ public class UnidadService {
     }
 
     @Transactional
-    public void eliminarUnidad(String idUnidad) {
+    public void eliminarUnidad(Long idUnidad) {
         Unidad unidad = unidadRepository.findById(idUnidad)
                 .orElseThrow(() -> new RuntimeException("Unidad no encontrada"));
         unidadRepository.delete(unidad);

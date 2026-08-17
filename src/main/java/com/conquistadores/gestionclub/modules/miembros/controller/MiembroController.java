@@ -5,6 +5,8 @@ import com.conquistadores.gestionclub.modules.miembros.service.MiembroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.conquistadores.gestionclub.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -17,12 +19,14 @@ public class MiembroController {
     private MiembroService miembroService;
 
     @GetMapping("/club/{idClub}")
-    public ResponseEntity<List<Miembro>> getMiembrosByClub(@PathVariable String idClub) {
+    @PreAuthorize("@securityService.hasAccessToClub(#idClub)")
+    public ResponseEntity<List<Miembro>> getMiembrosByClub(@PathVariable Long idClub) {
         return ResponseEntity.ok(miembroService.getMiembrosByClub(idClub));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Miembro> getMiembroById(@PathVariable String id) {
+    @PreAuthorize("@securityService.hasAccessToMiembro(#id)")
+    public ResponseEntity<Miembro> getMiembroById(@PathVariable Long id) {
         return miembroService.getMiembroById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -31,26 +35,35 @@ public class MiembroController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
     public ResponseEntity<Miembro> registrarMiembro(@RequestBody Miembro miembro) {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long callerClubId = userDetails.getUsuario().getClub().getIdClub();
+        String role = userDetails.getUsuario().getRol().getNombre().toUpperCase();
+
+        if (!"ADMINISTRADOR".equals(role)) {
+            if (miembro.getClub() == null || !miembro.getClub().getIdClub().equals(callerClubId)) {
+                throw new RuntimeException("Acceso denegado: No puedes registrar miembros en otros clubes.");
+            }
+        }
         return ResponseEntity.ok(miembroService.registrarMiembro(miembro));
     }
 
     @PutMapping("/{id}/unidad")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
-    public ResponseEntity<Miembro> cambiarUnidad(@PathVariable String id, @RequestParam String idUnidadDestino) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToMiembro(#id) and @securityService.hasAccessToUnidad(#idUnidadDestino)")
+    public ResponseEntity<Miembro> cambiarUnidad(@PathVariable Long id, @RequestParam Long idUnidadDestino) {
         return ResponseEntity.ok(miembroService.cambiarUnidad(id, idUnidadDestino));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
-    public ResponseEntity<Miembro> inactivarMiembro(@PathVariable String id) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToMiembro(#id)")
+    public ResponseEntity<Miembro> inactivarMiembro(@PathVariable Long id) {
         return ResponseEntity.ok(miembroService.inactivarMiembro(id));
     }
 
     @PostMapping("/importar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToClub(#idClub)")
     public ResponseEntity<String> importarMiembros(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("idClub") String idClub) {
+            @RequestParam("idClub") Long idClub) {
         miembroService.importarMiembrosCsv(file, idClub);
         return ResponseEntity.ok("Importación masiva de miembros completada con éxito.");
     }

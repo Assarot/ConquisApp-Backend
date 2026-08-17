@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AuditoriaRepository extends JpaRepository<Auditoria, String> {
+public interface AuditoriaRepository extends JpaRepository<Auditoria, Long> {
     List<Auditoria> findByModulo(String modulo);
 }

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SesionRepository extends JpaRepository<Sesion, String> {
-    List<Sesion> findByClaseIdClase(String idClase);
+public interface SesionRepository extends JpaRepository<Sesion, Long> {
+    List<Sesion> findByClaseIdClase(Long idClase);
 }

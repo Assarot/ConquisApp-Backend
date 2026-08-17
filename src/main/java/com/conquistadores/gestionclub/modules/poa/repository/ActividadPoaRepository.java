@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ActividadPoaRepository extends JpaRepository<ActividadPoa, String> {
-    List<ActividadPoa> findByPoaIdPoa(String idPoa);
+public interface ActividadPoaRepository extends JpaRepository<ActividadPoa, Long> {
+    List<ActividadPoa> findByPoaIdPoa(Long idPoa);
 }

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AsistenciaRepository extends JpaRepository<Asistencia, String> {
-    List<Asistencia> findBySesionIdSesion(String idSesion);
-    List<Asistencia> findByUsuarioIdUsuario(String idUsuario);
+public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
+    List<Asistencia> findBySesionIdSesion(Long idSesion);
+    List<Asistencia> findByUsuarioIdUsuario(Long idUsuario);
 }

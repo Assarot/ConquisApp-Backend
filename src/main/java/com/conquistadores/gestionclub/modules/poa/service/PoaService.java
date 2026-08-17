@@ -29,16 +29,16 @@ public class PoaService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    public List<Poa> getPoasByClub(String idClub) {
+    public List<Poa> getPoasByClub(Long idClub) {
         return poaRepository.findByClubIdClub(idClub);
     }
 
-    public List<ActividadPoa> getActividadesByPoa(String idPoa) {
+    public List<ActividadPoa> getActividadesByPoa(Long idPoa) {
         return actividadPoaRepository.findByPoaIdPoa(idPoa);
     }
 
     @Transactional
-    public Poa crearPoa(String idClub, Integer anio) {
+    public Poa crearPoa(Long idClub, Integer anio) {
         Club club = clubRepository.findById(idClub)
                 .orElseThrow(() -> new RuntimeException("Club no encontrado"));
 
@@ -54,7 +54,7 @@ public class PoaService {
     }
 
     @Transactional
-    public ActividadPoa registrarActividad(String idPoa, ActividadPoa nuevaActividad) {
+    public ActividadPoa registrarActividad(Long idPoa, ActividadPoa nuevaActividad) {
         Poa poa = poaRepository.findById(idPoa)
                 .orElseThrow(() -> new RuntimeException("POA no encontrado"));
 
@@ -68,7 +68,7 @@ public class PoaService {
     }
 
     @Transactional
-    public ActividadPoa actualizarFechaActividad(String idActividad, LocalDate nuevaFecha) {
+    public ActividadPoa actualizarFechaActividad(Long idActividad, LocalDate nuevaFecha) {
         ActividadPoa actividad = actividadPoaRepository.findById(idActividad)
                 .orElseThrow(() -> new RuntimeException("Actividad no encontrada"));
 

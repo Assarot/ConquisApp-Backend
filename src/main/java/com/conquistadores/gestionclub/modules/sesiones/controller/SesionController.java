@@ -16,19 +16,21 @@ public class SesionController {
     private SesionService sesionService;
 
     @GetMapping("/clase/{idClase}")
-    public ResponseEntity<List<Sesion>> getSesionesByClase(@PathVariable String idClase) {
+    @PreAuthorize("@securityService.hasAccessToClase(#idClase)")
+    public ResponseEntity<List<Sesion>> getSesionesByClase(@PathVariable Long idClase) {
         return ResponseEntity.ok(sesionService.getSesionesByClase(idClase));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sesion> getSesionById(@PathVariable String id) {
+    @PreAuthorize("@securityService.hasAccessToSesion(#id)")
+    public ResponseEntity<Sesion> getSesionById(@PathVariable Long id) {
         return sesionService.getSesionById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR') or hasRole('INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'INSTRUCTOR') and (#sesion.clase == null or @securityService.hasAccessToClase(#sesion.clase.idClase))")
     public ResponseEntity<Sesion> guardarSesion(@RequestBody Sesion sesion) {
         return ResponseEntity.ok(sesionService.guardarSesion(sesion));
     }

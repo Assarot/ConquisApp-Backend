@@ -15,9 +15,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class EspecialidadClase {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_especialidad_clase")
-    private String idEspecialidadClase;
+    private Long idEspecialidadClase;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_especialidad", nullable = false)

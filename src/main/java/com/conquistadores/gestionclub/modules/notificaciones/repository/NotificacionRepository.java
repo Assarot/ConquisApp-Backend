@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface NotificacionRepository extends JpaRepository<Notificacion, String> {
-    List<Notificacion> findByUsuarioDestinoIdUsuarioAndLeidoFalse(String idUsuario);
+public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
+    List<Notificacion> findByUsuarioDestinoIdUsuarioAndLeidoFalse(Long idUsuario);
 }

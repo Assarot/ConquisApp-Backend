@@ -2,6 +2,7 @@ package com.conquistadores.gestionclub.modules.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,9 +22,8 @@ public class RegisterRequest {
     @NotBlank
     private String password;
 
-    @NotBlank
-    private String idClub;
+    private Long idClub;
 
-    @NotBlank
-    private String idRol;
+    @NotNull
+    private Long idRol;
 }

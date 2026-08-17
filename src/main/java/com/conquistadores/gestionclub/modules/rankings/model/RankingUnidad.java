@@ -15,9 +15,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RankingUnidad {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ranking")
-    private String idRanking;
+    private Long idRanking;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_unidad", nullable = false)

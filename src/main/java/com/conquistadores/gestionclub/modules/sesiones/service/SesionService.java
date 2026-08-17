@@ -14,11 +14,11 @@ public class SesionService {
     @Autowired
     private SesionRepository sesionRepository;
 
-    public List<Sesion> getSesionesByClase(String idClase) {
+    public List<Sesion> getSesionesByClase(Long idClase) {
         return sesionRepository.findByClaseIdClase(idClase);
     }
 
-    public Optional<Sesion> getSesionById(String idSesion) {
+    public Optional<Sesion> getSesionById(Long idSesion) {
         return sesionRepository.findById(idSesion);
     }
 

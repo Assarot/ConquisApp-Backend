@@ -16,12 +16,13 @@ public class AsistenciaController {
     private AsistenciaService asistenciaService;
 
     @GetMapping("/sesion/{idSesion}")
-    public ResponseEntity<List<Asistencia>> getAsistenciasBySesion(@PathVariable String idSesion) {
+    @PreAuthorize("@securityService.hasAccessToSesion(#idSesion)")
+    public ResponseEntity<List<Asistencia>> getAsistenciasBySesion(@PathVariable Long idSesion) {
         return ResponseEntity.ok(asistenciaService.getAsistenciasBySesion(idSesion));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'INSTRUCTOR', 'CONSEJERO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'INSTRUCTOR', 'CONSEJERO') and (#asistencias.isEmpty() or @securityService.hasAccessToSesion(#asistencias[0].sesion.idSesion))")
     public ResponseEntity<List<Asistencia>> registrarAsistencias(@RequestBody List<Asistencia> asistencias) {
         return ResponseEntity.ok(asistenciaService.registrarAsistencias(asistencias));
     }

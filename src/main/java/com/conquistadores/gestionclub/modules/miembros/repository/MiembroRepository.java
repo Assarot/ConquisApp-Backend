@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MiembroRepository extends JpaRepository<Miembro, String> {
-    List<Miembro> findByClubIdClub(String idClub);
-    List<Miembro> findByUnidadIdUnidad(String idUnidad);
-    List<Miembro> findByClaseIdClase(String idClase);
+public interface MiembroRepository extends JpaRepository<Miembro, Long> {
+    List<Miembro> findByClubIdClub(Long idClub);
+    List<Miembro> findByUnidadIdUnidad(Long idUnidad);
+    List<Miembro> findByClaseIdClase(Long idClase);
 }

@@ -19,31 +19,34 @@ public class EspecialidadService {
     @Autowired
     private ClubRepository clubRepository;
 
-    public List<Especialidad> getEspecialidadesByClub(String idClub) {
-        return especialidadRepository.findByClubIdClub(idClub);
+    public List<Especialidad> getEspecialidadesByClub(Long idClub) {
+        return especialidadRepository.findAll();
     }
 
-    public List<Especialidad> getEspecialidadesByCategoria(String idClub, String categoria) {
-        return especialidadRepository.findByClubIdClubAndCategoriaIgnoreCase(idClub, categoria);
+    public List<Especialidad> getEspecialidadesByCategoria(Long idClub, String categoria) {
+        return especialidadRepository.findByCategoriaNombreIgnoreCase(categoria);
     }
 
     @Transactional
-    public Especialidad registrarEspecialidad(String idClub, Especialidad especialidad) {
-        Club club = clubRepository.findById(idClub)
-                .orElseThrow(() -> new RuntimeException("Club no encontrado"));
-
-        especialidad.setClub(club);
+    public Especialidad registrarEspecialidad(Long idClub, Especialidad especialidad) {
+        if (idClub != null) {
+            Club club = clubRepository.findById(idClub)
+                    .orElseThrow(() -> new RuntimeException("Club no encontrado"));
+            especialidad.setClub(club);
+        }
         return especialidadRepository.save(especialidad);
     }
 
     @Transactional
-    public Especialidad actualizarEspecialidad(String idEspecialidad, Especialidad request) {
+    public Especialidad actualizarEspecialidad(Long idEspecialidad, Especialidad request) {
         Especialidad especialidad = especialidadRepository.findById(idEspecialidad)
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
 
         especialidad.setNombre(request.getNombre());
         especialidad.setRequiereExamen(request.getRequiereExamen());
         especialidad.setCategoria(request.getCategoria());
+        especialidad.setNivelDestreza(request.getNivelDestreza());
+        especialidad.setAnoIntroduccion(request.getAnoIntroduccion());
         especialidad.setPuntosMaestria(request.getPuntosMaestria());
         especialidad.setDescripcion(request.getDescripcion());
         especialidad.setImagenUrl(request.getImagenUrl());
@@ -52,7 +55,7 @@ public class EspecialidadService {
     }
 
     @Transactional
-    public void eliminarEspecialidad(String idEspecialidad) {
+    public void eliminarEspecialidad(Long idEspecialidad) {
         Especialidad especialidad = especialidadRepository.findById(idEspecialidad)
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
         especialidadRepository.delete(especialidad);

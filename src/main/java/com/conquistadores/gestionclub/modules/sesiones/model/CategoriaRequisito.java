@@ -14,9 +14,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CategoriaRequisito {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_categoria")
-    private String idCategoria;
+    private Long idCategoria;
 
     @Column(nullable = false)
     private String nombre;

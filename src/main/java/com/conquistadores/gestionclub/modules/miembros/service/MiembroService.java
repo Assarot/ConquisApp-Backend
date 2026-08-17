@@ -11,6 +11,7 @@ import com.conquistadores.gestionclub.modules.miembros.model.HistorialUnidad;
 import com.conquistadores.gestionclub.modules.miembros.model.Miembro;
 import com.conquistadores.gestionclub.modules.miembros.repository.HistorialUnidadRepository;
 import com.conquistadores.gestionclub.modules.miembros.repository.MiembroRepository;
+import com.conquistadores.gestionclub.modules.notificaciones.service.NotificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,11 +40,14 @@ public class MiembroService {
     @Autowired
     private HistorialUnidadRepository historialUnidadRepository;
 
-    public List<Miembro> getMiembrosByClub(String idClub) {
+    @Autowired
+    private NotificacionService notificacionService;
+
+    public List<Miembro> getMiembrosByClub(Long idClub) {
         return miembroRepository.findByClubIdClub(idClub);
     }
 
-    public Optional<Miembro> getMiembroById(String idMiembro) {
+    public Optional<Miembro> getMiembroById(Long idMiembro) {
         return miembroRepository.findById(idMiembro);
     }
 
@@ -55,7 +59,7 @@ public class MiembroService {
     }
 
     @Transactional
-    public Miembro cambiarUnidad(String idMiembro, String idUnidadDestino) {
+    public Miembro cambiarUnidad(Long idMiembro, Long idUnidadDestino) {
         Miembro miembro = miembroRepository.findById(idMiembro)
                 .orElseThrow(() -> new RuntimeException("Miembro no encontrado"));
 
@@ -76,11 +80,19 @@ public class MiembroService {
         historial.setFechaCambio(LocalDateTime.now());
         historialUnidadRepository.save(historial);
 
+        // Trigger notification to the new Unit's Counselor if exists
+        if (unidadDestino.getConsejero() != null) {
+            notificacionService.registrarNotificacion(
+                unidadDestino.getConsejero().getIdUsuario(),
+                "El miembro " + miembro.getNombre() + " " + miembro.getApellido() + " ha sido asignado a tu unidad: " + unidadDestino.getNombre() + "."
+            );
+        }
+
         return updated;
     }
 
     @Transactional
-    public Miembro inactivarMiembro(String idMiembro) {
+    public Miembro inactivarMiembro(Long idMiembro) {
         Miembro miembro = miembroRepository.findById(idMiembro)
                 .orElseThrow(() -> new RuntimeException("Miembro no encontrado"));
 
@@ -90,7 +102,7 @@ public class MiembroService {
     }
 
     @Transactional
-    public void importarMiembrosCsv(MultipartFile file, String idClub) {
+    public void importarMiembrosCsv(MultipartFile file, Long idClub) {
         Club club = clubRepository.findById(idClub)
                 .orElseThrow(() -> new RuntimeException("Club no encontrado"));
 

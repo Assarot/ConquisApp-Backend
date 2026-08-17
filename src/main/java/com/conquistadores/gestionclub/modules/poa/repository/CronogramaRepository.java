@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CronogramaRepository extends JpaRepository<Cronograma, String> {
-    List<Cronograma> findByClaseIdClase(String idClase);
-    List<Cronograma> findByActividadIdActividad(String idActividad);
+public interface CronogramaRepository extends JpaRepository<Cronograma, Long> {
+    List<Cronograma> findByClaseIdClase(Long idClase);
+    List<Cronograma> findByActividadIdActividad(Long idActividad);
 }

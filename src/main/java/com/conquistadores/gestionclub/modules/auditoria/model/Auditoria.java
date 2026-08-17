@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Auditoria {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_auditoria")
-    private String idAuditoria;
+    private Long idAuditoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)

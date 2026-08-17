@@ -20,42 +20,44 @@ public class CronogramaController {
     private CronogramaService cronogramaService;
 
     @GetMapping("/clase/{idClase}")
-    public ResponseEntity<List<Cronograma>> getCronogramasByClase(@PathVariable String idClase) {
+    @PreAuthorize("@securityService.hasAccessToClase(#idClase)")
+    public ResponseEntity<List<Cronograma>> getCronogramasByClase(@PathVariable Long idClase) {
         return ResponseEntity.ok(cronogramaService.getCronogramasByClase(idClase));
     }
 
     @GetMapping("/{idCronograma}/bloques")
-    public ResponseEntity<List<BloqueCronograma>> getBloquesByCronograma(@PathVariable String idCronograma) {
+    @PreAuthorize("@securityService.hasAccessToCronograma(#idCronograma)")
+    public ResponseEntity<List<BloqueCronograma>> getBloquesByCronograma(@PathVariable Long idCronograma) {
         return ResponseEntity.ok(cronogramaService.getBloquesByCronograma(idCronograma));
     }
 
     @PostMapping("/{idCronograma}/bloques")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR') and @securityService.hasAccessToCronograma(#idCronograma)")
     public ResponseEntity<BloqueCronograma> registrarBloque(
-            @PathVariable String idCronograma,
+            @PathVariable Long idCronograma,
             @RequestBody BloqueCronograma bloque) {
         return ResponseEntity.ok(cronogramaService.registrarBloque(idCronograma, bloque));
     }
 
     @PutMapping("/bloques/{idBloque}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR') and @securityService.hasAccessToBloqueCronograma(#idBloque)")
     public ResponseEntity<BloqueCronograma> actualizarBloque(
-            @PathVariable String idBloque,
+            @PathVariable Long idBloque,
             @RequestBody BloqueCronograma bloque) {
         return ResponseEntity.ok(cronogramaService.actualizarBloque(idBloque, bloque));
     }
 
     @DeleteMapping("/bloques/{idBloque}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR')")
-    public ResponseEntity<Void> eliminarBloque(@PathVariable String idBloque) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR') and @securityService.hasAccessToBloqueCronograma(#idBloque)")
+    public ResponseEntity<Void> eliminarBloque(@PathVariable Long idBloque) {
         cronogramaService.eliminarBloque(idBloque);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{idCronograma}/importar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR') and @securityService.hasAccessToCronograma(#idCronograma)")
     public ResponseEntity<String> importarCronograma(
-            @PathVariable String idCronograma,
+            @PathVariable Long idCronograma,
             @RequestParam("file") MultipartFile file) {
         cronogramaService.importarCronogramaCsv(idCronograma, file);
         return ResponseEntity.ok("Importación de cronograma completada con éxito.");

@@ -6,6 +6,7 @@ import com.conquistadores.gestionclub.modules.auth.model.Usuario;
 import com.conquistadores.gestionclub.modules.auth.repository.UsuarioRepository;
 import com.conquistadores.gestionclub.modules.avances.model.Avance;
 import com.conquistadores.gestionclub.modules.avances.repository.AvanceRepository;
+import com.conquistadores.gestionclub.modules.notificaciones.service.NotificacionService;
 import com.conquistadores.gestionclub.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -28,7 +29,10 @@ public class AvanceService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<Avance> getAvancesByMiembro(String idMiembro) {
+    @Autowired
+    private NotificacionService notificacionService;
+
+    public List<Avance> getAvancesByMiembro(Long idMiembro) {
         return avanceRepository.findByMiembroIdMiembro(idMiembro);
     }
 
@@ -39,7 +43,7 @@ public class AvanceService {
     }
 
     @Transactional
-    public Avance corregirAvance(String idAvance, String nuevoEstado) {
+    public Avance corregirAvance(Long idAvance, String nuevoEstado) {
         Avance avance = avanceRepository.findById(idAvance)
                 .orElseThrow(() -> new RuntimeException("Avance no encontrado"));
 
@@ -76,6 +80,14 @@ public class AvanceService {
         auditoria.setValorAnterior("Estado anterior: " + estadoAnterior);
         auditoria.setValorNuevo("Nuevo estado: " + nuevoEstado);
         auditoriaRepository.save(auditoria);
+
+        // Trigger notification to counselor if exists
+        if (avance.getMiembro() != null && avance.getMiembro().getUnidad() != null && avance.getMiembro().getUnidad().getConsejero() != null) {
+            notificacionService.registrarNotificacion(
+                avance.getMiembro().getUnidad().getConsejero().getIdUsuario(),
+                "Se ha modificado el progreso académico de " + avance.getMiembro().getNombre() + " " + avance.getMiembro().getApellido() + " a: " + nuevoEstado + "."
+            );
+        }
 
         return updated;
     }

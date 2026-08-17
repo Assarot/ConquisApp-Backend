@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.List;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByEmail(String email);
-    List<Usuario> findByClubIdClub(String idClub);
+    List<Usuario> findByClubIdClub(Long idClub);
 }

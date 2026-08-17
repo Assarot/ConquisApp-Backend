@@ -14,9 +14,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Rol {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_rol")
-    private String idRol;
+    private Long idRol;
 
     @Column(nullable = false, unique = true)
     private String nombre; // e.g. ADMINISTRADOR, DIRECTOR, INSTRUCTOR, CONQUISTADOR, PADRE

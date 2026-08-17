@@ -15,9 +15,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class HistorialAcademico {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_historial_academico")
-    private String idHistorialAcademico;
+    private Long idHistorialAcademico;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_miembro", nullable = false)

@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MaterialRepository extends JpaRepository<Material, String> {
-    List<Material> findByClaseIdClase(String idClase);
-    List<Material> findByEspecialidadIdEspecialidad(String idEspecialidad);
+public interface MaterialRepository extends JpaRepository<Material, Long> {
+    List<Material> findByClaseIdClaseAndUsuarioCreadorClubIdClub(Long idClase, Long idClub);
+    List<Material> findByEspecialidadIdEspecialidadAndUsuarioCreadorClubIdClub(Long idEspecialidad, Long idClub);
+    List<Material> findByClaseIdClase(Long idClase);
+    List<Material> findByEspecialidadIdEspecialidad(Long idEspecialidad);
 }

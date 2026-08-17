@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import com.conquistadores.gestionclub.modules.club.model.Clase;
+import com.conquistadores.gestionclub.modules.especialidades.model.Especialidad;
+
 @Entity
 @Table(name = "requisitos")
 @Getter
@@ -14,17 +17,28 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Requisito {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_requisito")
-    private String idRequisito;
+    private Long idRequisito;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_categoria", nullable = false)
+    @JoinColumn(name = "id_categoria", nullable = true)
     private CategoriaRequisito categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_version_cuadernillo", nullable = false)
+    @JoinColumn(name = "id_version_cuadernillo", nullable = true)
     private VersionCuadernillo versionCuadernillo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_clase", nullable = true)
+    private Clase clase;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_especialidad", nullable = true)
+    private Especialidad especialidad;
+
+    @Column(name = "es_avanzado")
+    private Boolean esAvanzado;
 
     @Column(nullable = false, length = 1000)
     private String descripcion;

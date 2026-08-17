@@ -19,31 +19,33 @@ public class PoaController {
     private PoaService poaService;
 
     @GetMapping("/club/{idClub}")
-    public ResponseEntity<List<Poa>> getPoasByClub(@PathVariable String idClub) {
+    @PreAuthorize("@securityService.hasAccessToClub(#idClub)")
+    public ResponseEntity<List<Poa>> getPoasByClub(@PathVariable Long idClub) {
         return ResponseEntity.ok(poaService.getPoasByClub(idClub));
     }
 
     @GetMapping("/{idPoa}/actividades")
-    public ResponseEntity<List<ActividadPoa>> getActividadesByPoa(@PathVariable String idPoa) {
+    @PreAuthorize("@securityService.hasAccessToPoa(#idPoa)")
+    public ResponseEntity<List<ActividadPoa>> getActividadesByPoa(@PathVariable Long idPoa) {
         return ResponseEntity.ok(poaService.getActividadesByPoa(idPoa));
     }
 
     @PostMapping("/club/{idClub}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
-    public ResponseEntity<Poa> crearPoa(@PathVariable String idClub, @RequestParam Integer anio) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToClub(#idClub)")
+    public ResponseEntity<Poa> crearPoa(@PathVariable Long idClub, @RequestParam Integer anio) {
         return ResponseEntity.ok(poaService.crearPoa(idClub, anio));
     }
 
     @PostMapping("/{idPoa}/actividades")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
-    public ResponseEntity<ActividadPoa> registrarActividad(@PathVariable String idPoa, @RequestBody ActividadPoa nuevaActividad) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToPoa(#idPoa)")
+    public ResponseEntity<ActividadPoa> registrarActividad(@PathVariable Long idPoa, @RequestBody ActividadPoa nuevaActividad) {
         return ResponseEntity.ok(poaService.registrarActividad(idPoa, nuevaActividad));
     }
 
     @PutMapping("/actividades/{idActividad}/fecha")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToActividadPoa(#idActividad)")
     public ResponseEntity<ActividadPoa> actualizarFechaActividad(
-            @PathVariable String idActividad,
+            @PathVariable Long idActividad,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate nuevaFecha) {
         return ResponseEntity.ok(poaService.actualizarFechaActividad(idActividad, nuevaFecha));
     }

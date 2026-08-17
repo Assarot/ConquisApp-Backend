@@ -20,47 +20,53 @@ public class EspecialidadController {
     private EspecialidadService especialidadService;
 
     @GetMapping
-    public ResponseEntity<List<Especialidad>> getEspecialidades(@RequestParam(required = false) String idClub) {
-        if (idClub == null || idClub.isEmpty()) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<Especialidad>> getEspecialidades(@RequestParam(required = false) Long idClub) {
+        if (idClub == null) {
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            idClub = userDetails.getUsuario().getClub().getIdClub();
+            if (userDetails.getUsuario().getClub() != null) {
+                idClub = userDetails.getUsuario().getClub().getIdClub();
+            }
         }
         return ResponseEntity.ok(especialidadService.getEspecialidadesByClub(idClub));
     }
 
     @GetMapping("/categoria/{categoria}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Especialidad>> getEspecialidadesByCategoria(
-            @PathVariable String categoria,
-            @RequestParam(required = false) String idClub) {
-        if (idClub == null || idClub.isEmpty()) {
+         @PathVariable String categoria,
+         @RequestParam(required = false) Long idClub) {
+        if (idClub == null) {
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            idClub = userDetails.getUsuario().getClub().getIdClub();
+            if (userDetails.getUsuario().getClub() != null) {
+                idClub = userDetails.getUsuario().getClub().getIdClub();
+            }
         }
         return ResponseEntity.ok(especialidadService.getEspecialidadesByCategoria(idClub, categoria));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<Especialidad> registrarEspecialidad(@RequestBody Especialidad especialidad) {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String idClub = userDetails.getUsuario().getClub().getIdClub();
+        Long idClub = userDetails.getUsuario().getClub() != null ? userDetails.getUsuario().getClub().getIdClub() : null;
 
         Especialidad nueva = especialidadService.registrarEspecialidad(idClub, especialidad);
         return ResponseEntity.ok(nueva);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<Especialidad> actualizarEspecialidad(
-            @PathVariable String id,
+            @PathVariable Long id,
             @RequestBody Especialidad especialidad) {
         Especialidad updated = especialidadService.actualizarEspecialidad(id, especialidad);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR')")
-    public ResponseEntity<Void> eliminarEspecialidad(@PathVariable String id) {
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<Void> eliminarEspecialidad(@PathVariable Long id) {
         especialidadService.eliminarEspecialidad(id);
         return ResponseEntity.noContent().build();
     }

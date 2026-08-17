@@ -15,9 +15,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ActividadPoa {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_actividad")
-    private String idActividad;
+    private Long idActividad;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_poa", nullable = false)

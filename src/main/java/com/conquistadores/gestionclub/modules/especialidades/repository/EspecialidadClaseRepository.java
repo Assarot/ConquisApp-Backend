@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface EspecialidadClaseRepository extends JpaRepository<EspecialidadClase, String> {
-    List<EspecialidadClase> findByClaseIdClase(String idClase);
+public interface EspecialidadClaseRepository extends JpaRepository<EspecialidadClase, Long> {
+    List<EspecialidadClase> findByClaseIdClase(Long idClase);
 }

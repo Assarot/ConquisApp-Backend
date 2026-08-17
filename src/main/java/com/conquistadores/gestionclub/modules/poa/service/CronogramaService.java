@@ -23,16 +23,16 @@ public class CronogramaService {
     @Autowired
     private BloqueCronogramaRepository bloqueCronogramaRepository;
 
-    public List<Cronograma> getCronogramasByClase(String idClase) {
+    public List<Cronograma> getCronogramasByClase(Long idClase) {
         return cronogramaRepository.findByClaseIdClase(idClase);
     }
 
-    public List<BloqueCronograma> getBloquesByCronograma(String idCronograma) {
+    public List<BloqueCronograma> getBloquesByCronograma(Long idCronograma) {
         return bloqueCronogramaRepository.findByCronogramaIdCronograma(idCronograma);
     }
 
     @Transactional
-    public BloqueCronograma registrarBloque(String idCronograma, BloqueCronograma bloque) {
+    public BloqueCronograma registrarBloque(Long idCronograma, BloqueCronograma bloque) {
         Cronograma cronograma = cronogramaRepository.findById(idCronograma)
                 .orElseThrow(() -> new RuntimeException("Cronograma no encontrado"));
 
@@ -41,7 +41,7 @@ public class CronogramaService {
     }
 
     @Transactional
-    public BloqueCronograma actualizarBloque(String idBloque, BloqueCronograma request) {
+    public BloqueCronograma actualizarBloque(Long idBloque, BloqueCronograma request) {
         BloqueCronograma bloque = bloqueCronogramaRepository.findById(idBloque)
                 .orElseThrow(() -> new RuntimeException("Bloque de cronograma no encontrado"));
 
@@ -55,14 +55,14 @@ public class CronogramaService {
     }
 
     @Transactional
-    public void eliminarBloque(String idBloque) {
+    public void eliminarBloque(Long idBloque) {
         BloqueCronograma bloque = bloqueCronogramaRepository.findById(idBloque)
                 .orElseThrow(() -> new RuntimeException("Bloque de cronograma no encontrado"));
         bloqueCronogramaRepository.delete(bloque);
     }
 
     @Transactional
-    public void importarCronogramaCsv(String idCronograma, MultipartFile file) {
+    public void importarCronogramaCsv(Long idCronograma, MultipartFile file) {
         Cronograma cronograma = cronogramaRepository.findById(idCronograma)
                 .orElseThrow(() -> new RuntimeException("Cronograma no encontrado"));
 

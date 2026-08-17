@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PoaRepository extends JpaRepository<Poa, String> {
-    List<Poa> findByClubIdClub(String idClub);
-    Optional<Poa> findByClubIdClubAndAnio(String idClub, Integer anio);
+public interface PoaRepository extends JpaRepository<Poa, Long> {
+    List<Poa> findByClubIdClub(Long idClub);
+    Optional<Poa> findByClubIdClubAndAnio(Long idClub, Integer anio);
 }

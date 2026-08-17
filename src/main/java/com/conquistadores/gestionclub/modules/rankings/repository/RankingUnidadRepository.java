@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RankingUnidadRepository extends JpaRepository<RankingUnidad, String> {
-    List<RankingUnidad> findByUnidadIdUnidad(String idUnidad);
+public interface RankingUnidadRepository extends JpaRepository<RankingUnidad, Long> {
+    List<RankingUnidad> findByUnidadIdUnidad(Long idUnidad);
+    List<RankingUnidad> findByUnidadIdUnidadIn(List<Long> idUnidades);
 }

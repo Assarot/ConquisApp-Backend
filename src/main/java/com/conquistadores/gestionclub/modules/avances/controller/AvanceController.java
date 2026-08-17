@@ -16,19 +16,20 @@ public class AvanceController {
     private AvanceService avanceService;
 
     @GetMapping("/miembro/{idMiembro}")
-    public ResponseEntity<List<Avance>> getAvancesByMiembro(@PathVariable String idMiembro) {
+    @PreAuthorize("@securityService.hasAccessToMiembro(#idMiembro)")
+    public ResponseEntity<List<Avance>> getAvancesByMiembro(@PathVariable Long idMiembro) {
         return ResponseEntity.ok(avanceService.getAvancesByMiembro(idMiembro));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'INSTRUCTOR') and (#avance.miembro == null or @securityService.hasAccessToMiembro(#avance.miembro.idMiembro))")
     public ResponseEntity<Avance> registrarAvance(@RequestBody Avance avance) {
         return ResponseEntity.ok(avanceService.registrarAvance(avance));
     }
 
     @PutMapping("/{id}/correccion")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') or (hasRole('INSTRUCTOR') and @securityService.isInstructorOfClass(#id))")
-    public ResponseEntity<Avance> corregirAvance(@PathVariable String id, @RequestParam String nuevoEstado) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'INSTRUCTOR') and @securityService.hasAccessToAvance(#id)")
+    public ResponseEntity<Avance> corregirAvance(@PathVariable Long id, @RequestParam String nuevoEstado) {
         return ResponseEntity.ok(avanceService.corregirAvance(id, nuevoEstado));
     }
 }

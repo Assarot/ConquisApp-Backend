@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Notificacion {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_notificacion")
-    private String idNotificacion;
+    private Long idNotificacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario_destino", nullable = false)

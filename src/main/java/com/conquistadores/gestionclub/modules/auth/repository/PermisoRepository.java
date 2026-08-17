@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PermisoRepository extends JpaRepository<Permiso, String> {
-    List<Permiso> findByRolIdRol(String idRol);
+public interface PermisoRepository extends JpaRepository<Permiso, Long> {
+    List<Permiso> findByRolIdRol(Long idRol);
 }

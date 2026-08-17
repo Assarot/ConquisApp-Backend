@@ -14,9 +14,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Permiso {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_permiso")
-    private String idPermiso;
+    private Long idPermiso;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_rol", nullable = false)

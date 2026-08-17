@@ -17,20 +17,21 @@ public class ReporteController {
     private ReporteService reporteService;
 
     @GetMapping("/ranking/club/{idClub}")
-    public ResponseEntity<List<RankingUnidad>> obtenerRankingDeUnidades(@PathVariable String idClub) {
+    @PreAuthorize("@securityService.hasAccessToClub(#idClub)")
+    public ResponseEntity<List<RankingUnidad>> obtenerRankingDeUnidades(@PathVariable Long idClub) {
         return ResponseEntity.ok(reporteService.obtenerRankingDeUnidades(idClub));
     }
 
     @GetMapping("/indicadores/club/{idClub}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
-    public ResponseEntity<Map<String, Object>> obtenerIndicadoresDeGestion(@PathVariable String idClub) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToClub(#idClub)")
+    public ResponseEntity<Map<String, Object>> obtenerIndicadoresDeGestion(@PathVariable Long idClub) {
         return ResponseEntity.ok(reporteService.obtenerIndicadoresDeGestion(idClub));
     }
 
     @PostMapping("/ranking/unidad/{idUnidad}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO') and @securityService.hasAccessToUnidad(#idUnidad)")
     public ResponseEntity<RankingUnidad> registrarPuntajeUnidad(
-            @PathVariable String idUnidad,
+            @PathVariable Long idUnidad,
             @RequestParam Double puntaje,
             @RequestParam String periodo,
             @RequestParam String reglamento) {
