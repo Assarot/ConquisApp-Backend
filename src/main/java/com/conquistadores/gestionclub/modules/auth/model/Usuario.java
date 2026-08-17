@@ -20,7 +20,7 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Long idUsuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_club", nullable = true)
     @JsonIgnore
     private Club club;

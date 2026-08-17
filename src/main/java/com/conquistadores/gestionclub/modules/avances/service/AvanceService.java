@@ -32,8 +32,42 @@ public class AvanceService {
     @Autowired
     private NotificacionService notificacionService;
 
+    @Autowired
+    private com.conquistadores.gestionclub.modules.miembros.repository.MiembroRepository miembroRepository;
+
+    @Autowired
+    private com.conquistadores.gestionclub.modules.sesiones.repository.RequisitoRepository requisitoRepository;
+
+    @Transactional
     public List<Avance> getAvancesByMiembro(Long idMiembro) {
-        return avanceRepository.findByMiembroIdMiembro(idMiembro);
+        com.conquistadores.gestionclub.modules.miembros.model.Miembro miembro = miembroRepository.findById(idMiembro)
+                .orElseThrow(() -> new RuntimeException("Miembro no encontrado con ID: " + idMiembro));
+
+        List<Avance> existentes = avanceRepository.findByMiembroIdMiembro(idMiembro);
+
+        if (miembro.getClase() != null) {
+            List<com.conquistadores.gestionclub.modules.sesiones.model.Requisito> requisitos =
+                    requisitoRepository.findByClaseIdClase(miembro.getClase().getIdClase());
+
+            boolean nuevoCreado = false;
+            for (com.conquistadores.gestionclub.modules.sesiones.model.Requisito req : requisitos) {
+                boolean existe = existentes.stream()
+                        .anyMatch(a -> a.getRequisito().getIdRequisito().equals(req.getIdRequisito()));
+                if (!existe) {
+                    Avance nuevo = new Avance();
+                    nuevo.setMiembro(miembro);
+                    nuevo.setRequisito(req);
+                    nuevo.setEstado("PENDIENTE");
+                    nuevo.setFechaActualizacion(LocalDateTime.now());
+                    avanceRepository.save(nuevo);
+                    nuevoCreado = true;
+                }
+            }
+            if (nuevoCreado) {
+                existentes = avanceRepository.findByMiembroIdMiembro(idMiembro);
+            }
+        }
+        return existentes;
     }
 
     @Transactional
