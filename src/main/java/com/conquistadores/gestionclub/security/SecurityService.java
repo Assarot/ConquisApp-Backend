@@ -14,9 +14,13 @@ import com.conquistadores.gestionclub.modules.especialidades.repository.Especial
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service("securityService")
 public class SecurityService {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityService.class);
 
     @Autowired
     private ClaseRepository claseRepository;
@@ -104,9 +108,14 @@ public class SecurityService {
         if ("ADMINISTRADOR".equalsIgnoreCase(user.getUsuario().getRol().getNombre())) {
             return true;
         }
-        return poaRepository.findById(idPoa)
-                .map(p -> p.getClub() != null && p.getClub().getIdClub().equals(user.getUsuario().getClub().getIdClub()))
-                .orElse(false);
+        if (user.getUsuario().getClub() == null) {
+            log.warn("hasAccessToPoa: user {} has no club", user.getUsername());
+            return false;
+        }
+        Long userClubId = user.getUsuario().getClub().getIdClub();
+        boolean result = poaRepository.existsByIdPoaAndClubIdClub(idPoa, userClubId);
+        log.warn("hasAccessToPoa: idPoa={}, userClubId={}, result={}", idPoa, userClubId, result);
+        return result;
     }
 
     public boolean hasAccessToActividadPoa(Long idActividad) {
@@ -115,9 +124,9 @@ public class SecurityService {
         if ("ADMINISTRADOR".equalsIgnoreCase(user.getUsuario().getRol().getNombre())) {
             return true;
         }
-        return actividadPoaRepository.findById(idActividad)
-                .map(a -> a.getPoa() != null && a.getPoa().getClub() != null && a.getPoa().getClub().getIdClub().equals(user.getUsuario().getClub().getIdClub()))
-                .orElse(false);
+        if (user.getUsuario().getClub() == null) return false;
+        return actividadPoaRepository.existsByIdActividadAndPoaClubIdClub(
+                idActividad, user.getUsuario().getClub().getIdClub());
     }
 
     public boolean hasAccessToCronograma(Long idCronograma) {

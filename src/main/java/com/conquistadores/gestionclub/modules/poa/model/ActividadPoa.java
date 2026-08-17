@@ -33,4 +33,7 @@ public class ActividadPoa {
     private String ambito; // "CLUB", "IGLESIA", "REGION", "ASOCIACION", "RECURRENTE"
 
     private String responsable;
+
+    @Column
+    private String lugar;
 }
