@@ -36,4 +36,7 @@ public class ActividadPoa {
 
     @Column
     private String lugar;
+
+    @Column(name = "fecha_fin")
+    private LocalDate fechaFin;
 }
