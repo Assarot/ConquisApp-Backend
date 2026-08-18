@@ -43,7 +43,7 @@ public class PoaService {
     }
 
     public List<ActividadPoa> getActividadesByPoa(Long idPoa) {
-        return actividadPoaRepository.findByPoaIdPoa(idPoa);
+        return actividadPoaRepository.findByPoaIdPoaOrderByFechaAsc(idPoa);
     }
 
     @Transactional
@@ -160,7 +160,8 @@ public class PoaService {
             }
 
             // Resolver índices (con alias comunes)
-            Integer colFecha = colMap.get("fecha");
+            Integer colFecha = colMap.containsKey("fecha inicio") ? colMap.get("fecha inicio") : colMap.get("fecha");
+            Integer colFechaFin = colMap.containsKey("fecha fin") ? colMap.get("fecha fin") : colMap.get("fechafin");
             Integer colActividad = colMap.containsKey("actividad") ? colMap.get("actividad") : colMap.get("nombre");
             Integer colLugar = colMap.get("lugar");
             Integer colAmbito = colMap.get("ambito");
@@ -169,7 +170,7 @@ public class PoaService {
             // Validar que al menos Fecha y Actividad existan
             if (colFecha == null || colActividad == null) {
                 throw new RuntimeException(
-                    "No se encontraron las columnas obligatorias 'Fecha' y 'Actividad' en la cabecera del Excel. " +
+                    "No se encontraron las columnas obligatorias 'Fecha' o 'Fecha Inicio' y 'Actividad' en la cabecera del Excel. " +
                     "Columnas detectadas: " + colMap.keySet());
             }
 
@@ -178,7 +179,7 @@ public class PoaService {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                // Fecha (obligatoria)
+                // Fecha Inicio (obligatoria)
                 Cell fechaCell = row.getCell(colFecha);
                 if (fechaCell == null) continue;
                 LocalDate fecha;
@@ -189,6 +190,23 @@ public class PoaService {
                     String fechaStr = getCellStringValue(fechaCell);
                     if (fechaStr.isEmpty()) continue;
                     fecha = LocalDate.parse(fechaStr);
+                }
+
+                // Fecha Fin (opcional)
+                LocalDate fechaFin = null;
+                if (colFechaFin != null) {
+                    Cell fechaFinCell = row.getCell(colFechaFin);
+                    if (fechaFinCell != null) {
+                        if (fechaFinCell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(fechaFinCell)) {
+                            fechaFin = fechaFinCell.getDateCellValue().toInstant()
+                                    .atZone(ZoneId.systemDefault()).toLocalDate();
+                        } else {
+                            String fechaFinStr = getCellStringValue(fechaFinCell);
+                            if (!fechaFinStr.isEmpty()) {
+                                fechaFin = LocalDate.parse(fechaFinStr);
+                            }
+                        }
+                    }
                 }
 
                 // Actividad / Nombre (obligatorio)
@@ -208,6 +226,7 @@ public class PoaService {
                 ActividadPoa actividad = new ActividadPoa();
                 actividad.setPoa(poa);
                 actividad.setFecha(fecha);
+                actividad.setFechaFin(fechaFin);
                 actividad.setResponsable(responsable.isEmpty() ? "Sin asignar" : responsable);
                 actividad.setNombre(nombre);
                 actividad.setLugar(lugar);
@@ -232,6 +251,7 @@ public class PoaService {
 
         if (datos.getNombre()  != null) actividad.setNombre(datos.getNombre());
         if (datos.getFecha()   != null) actividad.setFecha(datos.getFecha());
+        actividad.setFechaFin(datos.getFechaFin());
         if (datos.getAmbito()  != null) actividad.setAmbito(datos.getAmbito());
         if (datos.getLugar()   != null) actividad.setLugar(datos.getLugar());
         if (datos.getResponsable() != null) actividad.setResponsable(datos.getResponsable());
@@ -260,7 +280,7 @@ public class PoaService {
      * La columna Responsable incluye una lista desplegable con los valores estAndar.
      */
     public byte[] exportarExcel(Long idPoa) throws IOException {
-        List<ActividadPoa> actividades = actividadPoaRepository.findByPoaIdPoa(idPoa);
+        List<ActividadPoa> actividades = actividadPoaRepository.findByPoaIdPoaOrderByFechaAsc(idPoa);
 
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -277,9 +297,9 @@ public class PoaService {
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             headerStyle.setAlignment(org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER);
 
-            // Nuevo orden: Fecha | Actividad | Lugar | Ambito | Responsable
-            // Columna:      A         B          C       D          E
-            String[] columns = {"Fecha", "Actividad", "Lugar", "Ambito", "Responsable"};
+            // Nuevo orden: Fecha Inicio | Fecha Fin | Actividad | Lugar | Ambito | Responsable
+            // Columna:      A              B           C           D       E        F
+            String[] columns = {"Fecha Inicio", "Fecha Fin", "Actividad", "Lugar", "Ambito", "Responsable"};
             Row header = sheet.createRow(0);
             for (int i = 0; i < columns.length; i++) {
                 Cell cell = header.createCell(i);
@@ -297,36 +317,46 @@ public class PoaService {
             for (ActividadPoa act : actividades) {
                 Row row = sheet.createRow(rowIdx++);
 
-                // Col A: Fecha
-                Cell fechaCell = row.createCell(0);
+                // Col A: Fecha Inicio
+                Cell fechaInicioCell = row.createCell(0);
                 if (act.getFecha() != null) {
-                    fechaCell.setCellValue(
+                    fechaInicioCell.setCellValue(
                         java.util.Date.from(act.getFecha().atStartOfDay(ZoneId.systemDefault()).toInstant())
                     );
-                    fechaCell.setCellStyle(dateStyle);
+                    fechaInicioCell.setCellStyle(dateStyle);
                 }
 
-                // Col B: Actividad
-                row.createCell(1).setCellValue(act.getNombre() != null ? act.getNombre() : "");
-                // Col C: Lugar
-                row.createCell(2).setCellValue(act.getLugar() != null ? act.getLugar() : "");
-                // Col D: Ambito
-                row.createCell(3).setCellValue(act.getAmbito() != null ? act.getAmbito() : "");
-                // Col E: Responsable
-                row.createCell(4).setCellValue(act.getResponsable() != null ? act.getResponsable() : "");
+                // Col B: Fecha Fin
+                Cell fechaFinCell = row.createCell(1);
+                LocalDate end = act.getFechaFin() != null ? act.getFechaFin() : act.getFecha();
+                if (end != null) {
+                    fechaFinCell.setCellValue(
+                        java.util.Date.from(end.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                    );
+                    fechaFinCell.setCellStyle(dateStyle);
+                }
+
+                // Col C: Actividad
+                row.createCell(2).setCellValue(act.getNombre() != null ? act.getNombre() : "");
+                // Col D: Lugar
+                row.createCell(3).setCellValue(act.getLugar() != null ? act.getLugar() : "");
+                // Col E: Ambito
+                row.createCell(4).setCellValue(act.getAmbito() != null ? act.getAmbito() : "");
+                // Col F: Responsable
+                row.createCell(5).setCellValue(act.getResponsable() != null ? act.getResponsable() : "");
             }
 
-            // --- Dropdown (Data Validation) en columna E (Responsable) ---
-            // Responsables estAndar disponibles en el desplegable
+            // --- Dropdown (Data Validation) en columna F (Responsable) ---
+            // Responsables estándar disponibles en el desplegable
             String[] responsablesEstandar = {
                 "Jóvenes", "Directiva", "Director",
                 "Director Asociado", "Secretario", "Tesorero"
             };
             DataValidationHelper dvHelper = sheet.getDataValidationHelper();
             DataValidationConstraint dvConstraint = dvHelper.createExplicitListConstraint(responsablesEstandar);
-            // Aplica a las filas de datos (fila 2 en adelante, columna E=índice 4)
+            // Aplica a las filas de datos (fila 2 en adelante, columna F=índice 5)
             org.apache.poi.ss.util.CellRangeAddressList addressList =
-                    new org.apache.poi.ss.util.CellRangeAddressList(1, 1000, 4, 4);
+                    new org.apache.poi.ss.util.CellRangeAddressList(1, 1000, 5, 5);
             DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
             validation.setSuppressDropDownArrow(false); // Mostrar flecha del dropdown
             validation.setShowErrorBox(false);           // Permitir valores personalizados
@@ -338,11 +368,11 @@ public class PoaService {
                     "También puedes agregar nombres nuevos.");
             sheet.addValidationData(validation);
 
-            // --- Dropdown en columna D (Ambito) ---
+            // --- Dropdown en columna E (Ambito) ---
             String[] ambitos = {"CLUB", "IGLESIA", "REGION", "ASOCIACION", "RECURRENTE"};
             DataValidationConstraint ambitoConstraint = dvHelper.createExplicitListConstraint(ambitos);
             org.apache.poi.ss.util.CellRangeAddressList ambitoRange =
-                    new org.apache.poi.ss.util.CellRangeAddressList(1, 1000, 3, 3);
+                    new org.apache.poi.ss.util.CellRangeAddressList(1, 1000, 4, 4);
             DataValidation ambitoValidation = dvHelper.createValidation(ambitoConstraint, ambitoRange);
             ambitoValidation.setSuppressDropDownArrow(false);
             ambitoValidation.setShowErrorBox(true);
@@ -354,13 +384,14 @@ public class PoaService {
             }
 
             // --- Anchos mínimos para que el Excel se vea limpio desde el inicio ---
-            // 256 unidades = 1 carActer de ancho en Excel
+            // 256 unidades = 1 carácter de ancho en Excel
             int[] minWidths = {
-                14 * 256,   // A: Fecha         → mínimo 14 chars (yyyy-MM-dd + margen)
-                30 * 256,   // B: Actividad      → mínimo 30 chars
-                18 * 256,   // C: Lugar           → mínimo 18 chars
-                14 * 256,   // D: Ambito          → mínimo 14 chars
-                28 * 256    // E: Responsable     → mínimo 28 chars (espacio para múltiples)
+                14 * 256,   // A: Fecha Inicio   → mínimo 14 chars
+                14 * 256,   // B: Fecha Fin      → mínimo 14 chars
+                30 * 256,   // C: Actividad      → mínimo 30 chars
+                18 * 256,   // D: Lugar          → mínimo 18 chars
+                14 * 256,   // E: Ambito         → mínimo 14 chars
+                28 * 256    // F: Responsable    → mínimo 28 chars
             };
             for (int i = 0; i < columns.length; i++) {
                 if (sheet.getColumnWidth(i) < minWidths[i]) {

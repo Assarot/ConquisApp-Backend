@@ -44,4 +44,7 @@ public class Asistencia {
 
     @Column(name = "materiales", nullable = false, columnDefinition = "boolean default false")
     private Boolean materiales = false;
+
+    @Column(name = "cuota", nullable = false, columnDefinition = "boolean default false")
+    private Boolean cuota = false;
 }
