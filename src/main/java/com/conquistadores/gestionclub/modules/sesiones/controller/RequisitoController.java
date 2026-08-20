@@ -3,6 +3,8 @@ package com.conquistadores.gestionclub.modules.sesiones.controller;
 import com.conquistadores.gestionclub.modules.sesiones.model.Requisito;
 import com.conquistadores.gestionclub.modules.sesiones.service.RequisitoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,31 @@ public class RequisitoController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Requisito>> getRequisitosByEspecialidad(@PathVariable Long idEspecialidad) {
         return ResponseEntity.ok(requisitoService.getRequisitosByEspecialidad(idEspecialidad));
+    }
+
+    @GetMapping("/categorias")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<com.conquistadores.gestionclub.modules.sesiones.model.CategoriaRequisito>> getCategorias() {
+        return ResponseEntity.ok(requisitoService.getCategorias());
+    }
+
+    @PostMapping("/categorias")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<com.conquistadores.gestionclub.modules.sesiones.model.CategoriaRequisito> crearCategoria(@RequestBody com.conquistadores.gestionclub.modules.sesiones.model.CategoriaRequisito categoria) {
+        return ResponseEntity.ok(requisitoService.crearCategoria(categoria));
+    }
+
+    @PutMapping("/categorias/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<com.conquistadores.gestionclub.modules.sesiones.model.CategoriaRequisito> actualizarCategoria(@PathVariable Long id, @RequestBody com.conquistadores.gestionclub.modules.sesiones.model.CategoriaRequisito categoria) {
+        return ResponseEntity.ok(requisitoService.actualizarCategoria(id, categoria));
+    }
+
+    @DeleteMapping("/categorias/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<Void> eliminarCategoria(@PathVariable Long id) {
+        requisitoService.eliminarCategoria(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/importar-cuadernillos")
@@ -63,5 +90,33 @@ public class RequisitoController {
     public ResponseEntity<Void> eliminarRequisito(@PathVariable Long id) {
         requisitoService.eliminarRequisito(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/exportar-especialidades")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<byte[]> exportarEspecialidades() {
+        try {
+            byte[] fileContent = requisitoService.exportarEspecialidades();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=especialidades.xlsx")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(fileContent);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/exportar-cuadernillos")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<byte[]> exportarCuadernillos() {
+        try {
+            byte[] fileContent = requisitoService.exportarCuadernillos();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cuadernillos.xlsx")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(fileContent);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

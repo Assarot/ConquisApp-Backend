@@ -28,7 +28,7 @@ public class Miembro {
     private Club club;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_unidad", nullable = false)
+    @JoinColumn(name = "id_unidad", nullable = true)
     private Unidad unidad;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -53,7 +53,8 @@ public class UnidadController {
                 idConsejero,
                 request.getIcono(),
                 request.getColor(),
-                request.getDescripcion()
+                request.getDescripcion(),
+                request.getImagen()
         );
         return ResponseEntity.ok(nueva);
     }
@@ -69,7 +70,8 @@ public class UnidadController {
                 idConsejero,
                 request.getIcono(),
                 request.getColor(),
-                request.getDescripcion()
+                request.getDescripcion(),
+                request.getImagen()
         );
         return ResponseEntity.ok(updated);
     }

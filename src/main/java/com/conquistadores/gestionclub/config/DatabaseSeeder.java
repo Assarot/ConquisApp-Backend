@@ -28,7 +28,16 @@ public class DatabaseSeeder implements CommandLineRunner {
         try {
             jdbcTemplate.execute("ALTER TABLE usuarios ALTER COLUMN id_club DROP NOT NULL");
             jdbcTemplate.execute("ALTER TABLE clases ALTER COLUMN id_club DROP NOT NULL");
+            jdbcTemplate.execute("ALTER TABLE clases ADD COLUMN IF NOT EXISTS color VARCHAR(20)");
             jdbcTemplate.execute("ALTER TABLE especialidades ALTER COLUMN id_club DROP NOT NULL");
+            jdbcTemplate.execute("ALTER TABLE miembros ALTER COLUMN id_unidad DROP NOT NULL");
+            jdbcTemplate.execute("ALTER TABLE historial_unidades ALTER COLUMN id_unidad_origen DROP NOT NULL");
+            jdbcTemplate.execute("ALTER TABLE historial_unidades ALTER COLUMN id_unidad_destino DROP NOT NULL");
+            
+            // Requirement Categories Table
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS categorias_requisitos (" +
+                    "id_categoria SERIAL PRIMARY KEY, " +
+                    "nombre VARCHAR(255) NOT NULL UNIQUE)");
             
             // 1. Categoria Especialidades
             jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS categorias_especialidades (" +
@@ -103,13 +112,22 @@ public class DatabaseSeeder implements CommandLineRunner {
                 1L, "v2026", Date.valueOf(LocalDate.now())
         );
 
-        // 5. Seed Classes — Las 6 clases básicas reales del club de Conquistadores
-        insertClase(1L, "Amigo", null, 1L);
-        insertClase(2L, "Compañero", null, 1L);
-        insertClase(3L, "Explorador", null, 1L);
-        insertClase(4L, "Pionero", null, 1L);
-        insertClase(5L, "Excursionista", null, 1L);
-        insertClase(6L, "Guía", null, 1L);
+        // 4.5 Seed Requirement Categories
+        insertCategoriaRequisito(1L, "I. Generales");
+        insertCategoriaRequisito(2L, "II. Descubrimiento Espiritual");
+        insertCategoriaRequisito(3L, "III. Sirviendo a los Demás");
+        insertCategoriaRequisito(4L, "IV. Desarrollo de la Amistad");
+        insertCategoriaRequisito(5L, "V. Salud y Aptitud Física");
+        insertCategoriaRequisito(6L, "VI. Estudio de la Naturaleza");
+        insertCategoriaRequisito(7L, "VII. Arte de Acampar / Destrezas al Aire Libre");
+
+        // 5. Seed Classes — Las 6 clases básicas reales del club de Conquistadores con sus colores oficiales
+        insertClase(1L, "Amigo", "#2563eb", null, 1L);
+        insertClase(2L, "Compañero", "#dc2626", null, 1L);
+        insertClase(3L, "Explorador", "#16a34a", null, 1L);
+        insertClase(4L, "Pionero", "#78716c", null, 1L);
+        insertClase(5L, "Excursionista", "#7c3aed", null, 1L);
+        insertClase(6L, "Guía", "#eab308", null, 1L);
 
         // 6. Seed Units
         insertUnidad(1L, "Halcones", CLUB_FERNANDO_STAHL, "pets", "primary", "Unidad masculina de conquistadores.");
@@ -144,6 +162,20 @@ public class DatabaseSeeder implements CommandLineRunner {
         insertMiembro(6L, "Camila", "Benítez", "CONQUISTADOR", "ACTIVO", "ACTUALIZADA", "POSEE_SEGURO", "FIRMADA", 0, CLUB_FERNANDO_STAHL, 4L, 4L);
         insertMiembro(7L, "Adrián", "Vásquez", "CONQUISTADOR", "ACTIVO", "ACTUALIZADA", "POSEE_SEGURO", "FIRMADA", 0, CLUB_FERNANDO_STAHL, 3L, 5L);
         insertMiembro(8L, "Renata", "Flores", "CONQUISTADOR", "ACTIVO", "ACTUALIZADA", "POSEE_SEGURO", "FIRMADA", 0, CLUB_FERNANDO_STAHL, 4L, 6L);
+
+        // 9. Seed Class Requirements
+        insertRequisito(1L, "Tener un mínimo de 10 años de edad.", false, 1L, 1L);
+        insertRequisito(2L, "Ser miembro activo del Club de Conquistadores.", false, 1L, 1L);
+        insertRequisito(3L, "Saber de memoria el Voto y la Ley del Conquistador.", false, 1L, 1L);
+        insertRequisito(4L, "Completar la clase de Amigo de la Naturaleza (Avanzada).", true, 1L, 1L);
+        insertRequisito(5L, "Leer el libro del año de Conquistadores.", false, 1L, 2L);
+        insertRequisito(6L, "Memorizar los libros del Antiguo Testamento en orden.", false, 1L, 2L);
+        insertRequisito(7L, "Identificar 10 flores silvestres y 10 insectos nativos.", false, 1L, 6L);
+        
+        insertRequisito(8L, "Tener un mínimo de 11 años de edad.", false, 2L, 1L);
+        insertRequisito(9L, "Saber de memoria el Himno de los Conquistadores.", false, 2L, 1L);
+        insertRequisito(10L, "Leer el libro del año de Conquistadores para Compañero.", false, 2L, 2L);
+
         syncSequences();
     }
 
@@ -155,8 +187,10 @@ public class DatabaseSeeder implements CommandLineRunner {
             jdbcTemplate.execute("SELECT setval('unidades_id_unidad_seq', COALESCE((SELECT MAX(id_unidad) FROM unidades), 1))");
             jdbcTemplate.execute("SELECT setval('clases_id_clase_seq', COALESCE((SELECT MAX(id_clase) FROM clases), 1))");
             jdbcTemplate.execute("SELECT setval('roles_id_rol_seq', COALESCE((SELECT MAX(id_rol) FROM roles), 1))");
+            jdbcTemplate.execute("SELECT setval('categorias_requisitos_id_categoria_seq', COALESCE((SELECT MAX(id_categoria) FROM categorias_requisitos), 1))");
             jdbcTemplate.execute("SELECT setval('categorias_especialidades_id_categoria_especialidad_seq', COALESCE((SELECT MAX(id_categoria_especialidad) FROM categorias_especialidades), 1))");
             jdbcTemplate.execute("SELECT setval('especialidades_id_especialidad_seq', COALESCE((SELECT MAX(id_especialidad) FROM especialidades), 1))");
+            jdbcTemplate.execute("SELECT setval('requisitos_id_requisito_seq', COALESCE((SELECT MAX(id_requisito) FROM requisitos), 1))");
             System.out.println("PostgreSQL sequences successfully synchronized after database seeding.");
         } catch (Exception e) {
             System.err.println("Warning: Could not sync PostgreSQL sequences: " + e.getMessage());
@@ -177,10 +211,10 @@ public class DatabaseSeeder implements CommandLineRunner {
         );
     }
 
-    private void insertClase(Long id, String nombre, Long idClub, Long idVersion) {
+    private void insertClase(Long id, String nombre, String color, Long idClub, Long idVersion) {
         jdbcTemplate.update(
-                "INSERT INTO clases (id_clase, nombre, id_club, id_version_cuadernillo) VALUES (?, ?, ?, ?)",
-                id, nombre, idClub, idVersion
+                "INSERT INTO clases (id_clase, nombre, color, id_club, id_version_cuadernillo) VALUES (?, ?, ?, ?, ?)",
+                id, nombre, color, idClub, idVersion
         );
     }
 
@@ -209,6 +243,20 @@ public class DatabaseSeeder implements CommandLineRunner {
         jdbcTemplate.update(
                 "INSERT INTO miembros (id_miembro, nombre, apellido, funcion, estado, estado_ficha_salud, estado_seguro, estado_adhesion_padres, pendientes, id_club, id_unidad, id_clase) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id, nombre, apellido, funcion, estado, salud, seguro, adhesion, pendientes, idClub, idUnidad, idClase
+        );
+    }
+
+    private void insertCategoriaRequisito(Long id, String nombre) {
+        jdbcTemplate.update(
+                "INSERT INTO categorias_requisitos (id_categoria, nombre) VALUES (?, ?)",
+                id, nombre
+        );
+    }
+
+    private void insertRequisito(Long id, String descripcion, boolean esAvanzado, Long idClase, Long idCategoria) {
+        jdbcTemplate.update(
+                "INSERT INTO requisitos (id_requisito, descripcion, es_avanzado, id_clase, id_categoria, id_version_cuadernillo) VALUES (?, ?, ?, ?, ?, ?)",
+                id, descripcion, esAvanzado, idClase, idCategoria, 1L
         );
     }
 }

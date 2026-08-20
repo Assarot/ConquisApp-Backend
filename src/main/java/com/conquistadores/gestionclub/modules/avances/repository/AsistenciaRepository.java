@@ -8,5 +8,6 @@ import java.util.List;
 @Repository
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     List<Asistencia> findBySesionIdSesion(Long idSesion);
-    List<Asistencia> findByUsuarioIdUsuario(Long idUsuario);
+    List<Asistencia> findByMiembroIdMiembro(Long idMiembro);
+    List<Asistencia> findByMiembroUnidadIdUnidad(Long idUnidad);
 }

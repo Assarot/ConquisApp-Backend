@@ -41,6 +41,7 @@ public class ClaseService {
     public Clase actualizarClase(Long idClase, Clase claseDetails) {
         Clase existing = getClaseById(idClase);
         existing.setNombre(claseDetails.getNombre());
+        existing.setColor(claseDetails.getColor());
         if (claseDetails.getVersionCuadernillo() != null) {
             existing.setVersionCuadernillo(claseDetails.getVersionCuadernillo());
         }

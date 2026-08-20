@@ -158,7 +158,7 @@ public class SecurityService {
             return true;
         }
         return sesionRepository.findById(idSesion)
-                .map(s -> s.getClase() != null && s.getClase().getClub() != null && s.getClase().getClub().getIdClub().equals(user.getUsuario().getClub().getIdClub()))
+                .map(s -> s.getInstructor() != null && s.getInstructor().getClub() != null && s.getInstructor().getClub().getIdClub().equals(user.getUsuario().getClub().getIdClub()))
                 .orElse(false);
     }
 
