@@ -63,4 +63,19 @@ public class Sesion {
         inverseJoinColumns = @JoinColumn(name = "id_especialidad")
     )
     private List<Especialidad> especialidades;
+
+    @Transient
+    private Long idClase;
+
+    public Long getIdClase() {
+        return idClase;
+    }
+
+    public void setIdClase(Long idClase) {
+        this.idClase = idClase;
+    }
+
+    public void setDuracionMinutos(Integer duracionMinutos) {
+        this.duracion = duracionMinutos;
+    }
 }

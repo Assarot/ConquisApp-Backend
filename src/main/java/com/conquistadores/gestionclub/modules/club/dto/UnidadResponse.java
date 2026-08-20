@@ -19,4 +19,5 @@ public class UnidadResponse {
     private String icono;
     private String color;
     private String descripcion;
+    private String imagen;
 }

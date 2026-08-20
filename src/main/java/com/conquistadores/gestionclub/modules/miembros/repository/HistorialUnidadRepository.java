@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface HistorialUnidadRepository extends JpaRepository<HistorialUnidad, Long> {
     List<HistorialUnidad> findByMiembroIdMiembro(Long idMiembro);
+    List<HistorialUnidad> findByUnidadOrigenIdUnidad(Long idUnidad);
+    List<HistorialUnidad> findByUnidadDestinoIdUnidad(Long idUnidad);
 }

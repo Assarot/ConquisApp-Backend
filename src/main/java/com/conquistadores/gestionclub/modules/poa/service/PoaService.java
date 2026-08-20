@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class PoaService {
@@ -133,6 +134,7 @@ public class PoaService {
                 .orElseThrow(() -> new RuntimeException("POA no encontrado"));
 
         List<ActividadPoa> importadas = new ArrayList<>();
+        List<ActividadPoa> actividadesExistentes = actividadPoaRepository.findByPoaIdPoaOrderByFechaAsc(idPoa);
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -223,9 +225,24 @@ public class PoaService {
                 // Responsable (opcional — se importa tal cual, incluso valores personalizados)
                 String responsable = colResponsable != null ? getCellStringValue(row.getCell(colResponsable)) : "";
 
-                ActividadPoa actividad = new ActividadPoa();
-                actividad.setPoa(poa);
-                actividad.setFecha(fecha);
+                final LocalDate finalFecha = fecha;
+                final String finalNombre = nombre.trim();
+                Optional<ActividadPoa> actividadExistente = actividadesExistentes.stream()
+                        .filter(a -> a.getNombre().equalsIgnoreCase(finalNombre) && a.getFecha().equals(finalFecha))
+                        .findFirst();
+
+                ActividadPoa actividad;
+                String eventAction;
+                if (actividadExistente.isPresent()) {
+                    actividad = actividadExistente.get();
+                    eventAction = "UPDATE_DATE";
+                } else {
+                    actividad = new ActividadPoa();
+                    actividad.setPoa(poa);
+                    actividad.setFecha(fecha);
+                    eventAction = "CREATE";
+                }
+
                 actividad.setFechaFin(fechaFin);
                 actividad.setResponsable(responsable.isEmpty() ? "Sin asignar" : responsable);
                 actividad.setNombre(nombre);
@@ -233,7 +250,7 @@ public class PoaService {
                 actividad.setAmbito(ambito);
 
                 ActividadPoa saved = actividadPoaRepository.save(actividad);
-                eventPublisher.publishEvent(new PoaUpdatedEvent(this, saved.getIdActividad(), "CREATE"));
+                eventPublisher.publishEvent(new PoaUpdatedEvent(this, saved.getIdActividad(), eventAction));
                 importadas.add(saved);
             }
         }

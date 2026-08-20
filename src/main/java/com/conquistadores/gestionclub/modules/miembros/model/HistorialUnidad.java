@@ -25,11 +25,11 @@ public class HistorialUnidad {
     private Miembro miembro;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_unidad_origen", nullable = false)
+    @JoinColumn(name = "id_unidad_origen", nullable = true)
     private Unidad unidadOrigen;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_unidad_destino", nullable = false)
+    @JoinColumn(name = "id_unidad_destino", nullable = true)
     private Unidad unidadDestino;
 
     @Column(name = "fecha_cambio", nullable = false)

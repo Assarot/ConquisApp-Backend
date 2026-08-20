@@ -26,4 +26,10 @@ public class AsistenciaController {
     public ResponseEntity<List<Asistencia>> registrarAsistencias(@RequestBody List<Asistencia> asistencias) {
         return ResponseEntity.ok(asistenciaService.registrarAsistencias(asistencias));
     }
+
+    @GetMapping("/unidad/{idUnidad}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR', 'SECRETARIO', 'CONSEJERO', 'DIRECTOR_ASOCIADO', 'INSTRUCTOR') and @securityService.hasAccessToUnidad(#idUnidad)")
+    public ResponseEntity<List<Asistencia>> getAsistenciasByUnidad(@PathVariable Long idUnidad) {
+        return ResponseEntity.ok(asistenciaService.getAsistenciasByUnidad(idUnidad));
+    }
 }

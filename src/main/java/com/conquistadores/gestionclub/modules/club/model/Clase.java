@@ -28,6 +28,9 @@ public class Clase {
     @Column(nullable = false)
     private String nombre;
 
+    @Column(length = 20)
+    private String color;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_version_cuadernillo")
     private VersionCuadernillo versionCuadernillo;

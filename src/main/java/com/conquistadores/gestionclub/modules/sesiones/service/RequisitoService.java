@@ -20,10 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RequisitoService {
@@ -105,14 +107,26 @@ public class RequisitoService {
                 // 3. Map advanced flag
                 boolean esAvanzado = "Avanzado".equalsIgnoreCase(tipoName) || "Avanzada".equalsIgnoreCase(tipoName);
 
-                // 4. Create Requisito
-                Requisito req = new Requisito();
-                req.setClase(clase);
-                req.setEsAvanzado(esAvanzado);
-                req.setCategoria(cat);
-                req.setDescripcion(descripcion);
-                req.setVersionCuadernillo(defaultVersion);
-                toSave.add(req);
+                // 4. Create Requisito if it does not already exist
+                final String finalDesc = descripcion;
+                boolean alreadyExists = requisitoRepository.findByClaseIdClase(clase.getIdClase())
+                        .stream()
+                        .anyMatch(r -> r.getDescripcion().equalsIgnoreCase(finalDesc) && r.getEsAvanzado().equals(esAvanzado));
+
+                if (!alreadyExists) {
+                    boolean addedInSession = toSave.stream()
+                            .anyMatch(r -> r.getClase() != null && r.getClase().getIdClase().equals(clase.getIdClase())
+                                    && r.getDescripcion().equalsIgnoreCase(finalDesc) && r.getEsAvanzado().equals(esAvanzado));
+                    if (!addedInSession) {
+                        Requisito req = new Requisito();
+                        req.setClase(clase);
+                        req.setEsAvanzado(esAvanzado);
+                        req.setCategoria(cat);
+                        req.setDescripcion(descripcion);
+                        req.setVersionCuadernillo(defaultVersion);
+                        toSave.add(req);
+                    }
+                }
             }
             requisitoRepository.saveAll(toSave);
         }
@@ -196,14 +210,121 @@ public class RequisitoService {
                     esp = especialidadRepository.save(esp);
                 }
 
-                // 3. Create Requisito
-                Requisito req = new Requisito();
-                req.setEspecialidad(esp);
-                req.setDescripcion(reqDesc);
-                req.setEsAvanzado(false);
-                toSave.add(req);
+                // 3. Create Requisito if it does not already exist
+                final String finalReqDesc = reqDesc;
+                final Especialidad finalEsp = esp;
+                boolean alreadyExists = requisitoRepository.findByEspecialidadIdEspecialidad(esp.getIdEspecialidad())
+                        .stream()
+                        .anyMatch(r -> r.getDescripcion().equalsIgnoreCase(finalReqDesc));
+
+                if (!alreadyExists) {
+                    boolean addedInSession = toSave.stream()
+                            .anyMatch(r -> r.getEspecialidad() != null && r.getEspecialidad().getIdEspecialidad().equals(finalEsp.getIdEspecialidad())
+                                    && r.getDescripcion().equalsIgnoreCase(finalReqDesc));
+                    if (!addedInSession) {
+                        Requisito req = new Requisito();
+                        req.setEspecialidad(esp);
+                        req.setDescripcion(reqDesc);
+                        req.setEsAvanzado(false);
+                        toSave.add(req);
+                    }
+                }
             }
             requisitoRepository.saveAll(toSave);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportarEspecialidades() throws Exception {
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            
+            Sheet sheet = workbook.createSheet("Especialidades");
+            
+            // Create Header Row
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("Nombre Especialidad");
+            header.createCell(1).setCellValue("Nivel Destreza");
+            header.createCell(2).setCellValue("Año Introducción");
+            header.createCell(3).setCellValue("Categoría");
+            header.createCell(4).setCellValue("Descripción del Requisito");
+            
+            // Fetch all requirements that belong to a specialty
+            List<Requisito> reqs = requisitoRepository.findAll().stream()
+                    .filter(r -> r.getEspecialidad() != null)
+                    .collect(Collectors.toList());
+            
+            int rowIdx = 1;
+            for (Requisito r : reqs) {
+                Row row = sheet.createRow(rowIdx++);
+                Especialidad esp = r.getEspecialidad();
+                row.createCell(0).setCellValue(esp.getNombre());
+                row.createCell(1).setCellValue(esp.getNivelDestreza() != null ? esp.getNivelDestreza().toString() : "1");
+                row.createCell(2).setCellValue(esp.getAnoIntroduccion() != null ? esp.getAnoIntroduccion().toString() : "");
+                row.createCell(3).setCellValue(esp.getCategoria() != null ? esp.getCategoria().getNombre() : "");
+                row.createCell(4).setCellValue(r.getDescripcion());
+            }
+            
+            // Also fetch specialties that have NO requirements yet so they are not left out
+            List<Especialidad> allEsps = especialidadRepository.findAll();
+            for (Especialidad esp : allEsps) {
+                final Especialidad finalEsp = esp;
+                boolean hasReq = reqs.stream().anyMatch(r -> r.getEspecialidad().getIdEspecialidad().equals(finalEsp.getIdEspecialidad()));
+                if (!hasReq) {
+                    Row row = sheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(esp.getNombre());
+                    row.createCell(1).setCellValue(esp.getNivelDestreza() != null ? esp.getNivelDestreza().toString() : "1");
+                    row.createCell(2).setCellValue(esp.getAnoIntroduccion() != null ? esp.getAnoIntroduccion().toString() : "");
+                    row.createCell(3).setCellValue(esp.getCategoria() != null ? esp.getCategoria().getNombre() : "");
+                    row.createCell(4).setCellValue(""); // empty requirement
+                }
+            }
+            
+            // Auto size columns
+            for (int i = 0; i < 5; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            
+            workbook.write(out);
+            return out.toByteArray();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportarCuadernillos() throws Exception {
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            
+            Sheet sheet = workbook.createSheet("Cuadernillos");
+            
+            // Create Header Row
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("Clase");
+            header.createCell(1).setCellValue("Tipo");
+            header.createCell(2).setCellValue("Categoría");
+            header.createCell(3).setCellValue("Descripción del Requisito");
+            
+            // Fetch all requirements that belong to a class
+            List<Requisito> reqs = requisitoRepository.findAll().stream()
+                    .filter(r -> r.getClase() != null)
+                    .collect(Collectors.toList());
+            
+            int rowIdx = 1;
+            for (Requisito r : reqs) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(r.getClase().getNombre());
+                row.createCell(1).setCellValue(r.getEsAvanzado() ? "Avanzado" : "Regular");
+                row.createCell(2).setCellValue(r.getCategoria() != null ? r.getCategoria().getNombre() : "I. Generales");
+                row.createCell(3).setCellValue(r.getDescripcion());
+            }
+            
+            // Auto size columns
+            for (int i = 0; i < 4; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            
+            workbook.write(out);
+            return out.toByteArray();
         }
     }
 
@@ -271,6 +392,28 @@ public class RequisitoService {
         }
         
         return requisitoRepository.save(req);
+    }
+
+    public List<CategoriaRequisito> getCategorias() {
+        return categoriaRequisitoRepository.findAll();
+    }
+
+    @Transactional
+    public CategoriaRequisito crearCategoria(CategoriaRequisito categoria) {
+        return categoriaRequisitoRepository.save(categoria);
+    }
+
+    @Transactional
+    public CategoriaRequisito actualizarCategoria(Long id, CategoriaRequisito details) {
+        CategoriaRequisito existing = categoriaRequisitoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + id));
+        existing.setNombre(details.getNombre());
+        return categoriaRequisitoRepository.save(existing);
+    }
+
+    @Transactional
+    public void eliminarCategoria(Long id) {
+        categoriaRequisitoRepository.deleteById(id);
     }
 
     @Transactional

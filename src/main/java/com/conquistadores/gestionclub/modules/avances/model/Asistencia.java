@@ -1,7 +1,7 @@
 package com.conquistadores.gestionclub.modules.avances.model;
 
 import com.conquistadores.gestionclub.modules.sesiones.model.Sesion;
-import com.conquistadores.gestionclub.modules.auth.model.Usuario;
+import com.conquistadores.gestionclub.modules.miembros.model.Miembro;
 import com.conquistadores.gestionclub.modules.auditoria.listener.AuditListener;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,8 +27,8 @@ public class Asistencia {
     private Sesion sesion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario usuario; // Conquistador, Instructor, Consejero, Líder
+    @JoinColumn(name = "id_miembro", nullable = false)
+    private Miembro miembro;
 
     @Column(nullable = false)
     private String estado; // "PRESENTE", "AUSENTE", "JUSTIFICADO"

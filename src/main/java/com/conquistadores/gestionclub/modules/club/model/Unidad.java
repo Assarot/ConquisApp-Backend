@@ -35,4 +35,7 @@ public class Unidad {
     private String color;
     private String icono;
     private String descripcion;
+
+    @Column(columnDefinition = "TEXT")
+    private String imagen;
 }
